@@ -2,9 +2,12 @@ package org.apache.beam.sdk.io.text;
 
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+
 import org.apache.beam.sdk.io.GenerateSequence;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.common.HashingFn;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.Combine;
@@ -13,6 +16,7 @@ import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.transforms.Values;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.TypeDescriptors;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,16 +27,27 @@ import org.junit.runners.JUnit4;
 public class TextIOIT {
 
   private static final String FILE_BASENAME = "textioit";
-  private static final long LINES_OF_TEXT_COUNT = 10000L;
+  private static long linesOfTextCount = 10000L;
   private static final String EXPECTED_HASHCODE = "ccae48ff685c1822e9f4d510363bf018";
 
   @Rule public TestPipeline pipeline = TestPipeline.create();
+
+  @BeforeClass
+  public static void setup() throws ParseException {
+    PipelineOptionsFactory.register(IOTextTestPipelineOptions.class);
+    IOTextTestPipelineOptions options = TestPipeline.testingPipelineOptions()
+            .as(IOTextTestPipelineOptions.class);
+
+    if (options.getTestSize() != null) {
+      linesOfTextCount = options.getTestSize();
+    }
+  }
 
   @Test
   public void testWriteThenRead() {
 
     PCollection<String> consolidatedContentHashcode = pipeline
-        .apply("Generate sequence", GenerateSequence.from(0).to(LINES_OF_TEXT_COUNT))
+        .apply("Generate sequence", GenerateSequence.from(0).to(linesOfTextCount))
         .apply("Produce text", MapElements.into(TypeDescriptors.strings()).via(produceTextLine()))
         .apply("Write content to files", TextIO.write().to(FILE_BASENAME).withOutputFilenames())
         .getPerDestinationOutputFilenames()
