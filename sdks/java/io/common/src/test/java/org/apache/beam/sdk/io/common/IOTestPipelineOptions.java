@@ -17,6 +17,7 @@
  */
 package org.apache.beam.sdk.io.common;
 
+import org.apache.beam.sdk.io.hdfs.HadoopFileSystemOptions;
 import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.Validation;
@@ -27,7 +28,7 @@ import org.apache.beam.sdk.testing.TestPipelineOptions;
  * if a test tries to read TestPipelineOptions, it must be able to understand all the options
  * that were passed on the command line.
  */
-public interface IOTestPipelineOptions extends TestPipelineOptions {
+public interface IOTestPipelineOptions extends TestPipelineOptions, HadoopFileSystemOptions {
   /* Postgres */
   @Description("Server name for postgres server (host name/ip address)")
   @Default.String("postgres-server-name")
@@ -107,4 +108,10 @@ public interface IOTestPipelineOptions extends TestPipelineOptions {
   String getCompressionType();
 
   void setCompressionType(String compressionType);
+
+  /* HDFS cluster */
+  @Description("Host address of hdfs namenode server")
+  String getHdfsNamenodeHost();
+  void setHdfsNamenodeHost(String host);
+
 }

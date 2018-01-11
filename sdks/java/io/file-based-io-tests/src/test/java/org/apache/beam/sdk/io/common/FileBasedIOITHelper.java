@@ -20,10 +20,12 @@ package org.apache.beam.sdk.io.common;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.beam.sdk.io.FileSystems;
@@ -33,6 +35,7 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.PipelineOptionsValidator;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Contains helper methods for file based IO Integration tests.
@@ -53,6 +56,35 @@ public class FileBasedIOITHelper {
 
   public static String appendTimestampToPrefix(String filenamePrefix) {
     return String.format("%s_%s", filenamePrefix, new Date().getTime());
+  }
+
+  public static String appendHdfsNameNode(String filenamePrefix, String namenode){
+    String hdfsPrefix = String.format("hdfs://%s:9000", namenode);
+    if (!filenamePrefix.startsWith(hdfsPrefix)){
+      return String.format("%s/%s", hdfsPrefix, filenamePrefix);
+    } else {
+      return filenamePrefix;
+    }
+  }
+
+  public static List<Configuration> createHdfsConfiguration(String namenode){
+    List<Configuration> hdfsParams = Lists.newArrayList();
+    Configuration conf = new Configuration(true);
+    String coreSite = String.format("<configuration>\n" + "    <property>\n"
+        + "        <name>fs.defaultFS</name>\n"
+        + "        <value>hdfs://%s:9000</value>\n" + "    </property>\n"
+        + "</configuration>", namenode);
+
+    String hdfsSite = String.format("<configuration>\n" + "    <property>\n"
+        + "        <name>dfs.replication</name>\n" + "        <value>1</value>\n"
+        + "    </property>\n" + "    <property>\n"
+        + "        <name>dfs.client.use.datanode.hostname</name>\n"
+        + "        <value>true</value>\n" + "    </property>\n" + "</configuration>");
+
+    conf.addResource(coreSite);
+    conf.addResource(hdfsSite);
+    hdfsParams.add(conf);
+    return hdfsParams;
   }
 
   public static String getExpectedHashForLineCount(Long lineCount) {

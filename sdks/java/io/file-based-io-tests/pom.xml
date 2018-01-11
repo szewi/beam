@@ -174,11 +174,6 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-hadoop-file-system</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-hdfs</artifactId>
                     <version>${apache.hadoop.version}</version>
@@ -203,6 +198,17 @@
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-hadoop-file-system</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${apache.hadoop.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>

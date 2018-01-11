@@ -19,7 +19,9 @@
 package org.apache.beam.sdk.io.text;
 
 import static org.apache.beam.sdk.io.Compression.AUTO;
+import static org.apache.beam.sdk.io.common.FileBasedIOITHelper.appendHdfsNameNode;
 import static org.apache.beam.sdk.io.common.FileBasedIOITHelper.appendTimestampToPrefix;
+//import static org.apache.beam.sdk.io.common.FileBasedIOITHelper.createHdfsConfiguration;
 import static org.apache.beam.sdk.io.common.FileBasedIOITHelper.getExpectedHashForLineCount;
 import static org.apache.beam.sdk.io.common.FileBasedIOITHelper.readTestPipelineOptions;
 
@@ -74,10 +76,16 @@ public class TextIOIT {
   @BeforeClass
   public static void setup() throws ParseException {
     IOTestPipelineOptions options = readTestPipelineOptions();
+    System.out.println("HDFS text " + options.getHdfsConfiguration().toString());
 
     numberOfTextLines = options.getNumberOfRecords();
     filenamePrefix = appendTimestampToPrefix(options.getFilenamePrefix());
     compressionType = Compression.valueOf(options.getCompressionType());
+
+    if (System.getProperty("filesystem").equals("hdfs") && options.getHdfsNamenodeHost() != null){
+      filenamePrefix = appendHdfsNameNode(filenamePrefix, options.getHdfsNamenodeHost());
+      //options.setHdfsConfiguration(createHdfsConfiguration(options.getHdfsNamenodeHost()));
+    }
   }
 
   @Test
